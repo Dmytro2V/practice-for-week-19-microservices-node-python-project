@@ -9,12 +9,20 @@ app = Flask(__name__)
 app.config.from_object(Configuration)
 
 
-# @app.before_request
-# def to_allowed_host():
-#     # if request.remote_addr != '127.0.0.1':
-#     #     abort(403)
-#     if 'host.docker.internal' not in request.url_root:
-#         abort(403)
+
+
+@app.before_request
+def to_allowed_host():
+    # test log
+    app.logger.info('request: %s', request)
+    # app.logger.info('request.args.value: %s', request.args.value)
+    app.logger.info('request.remote_addr: %s', request.remote_addr)
+    app.logger.info('request.url_root: %s', request.url_root)
+    # if request.remote_addr != '127.0.0.1':
+    #     abort(403)
+    
+    if 'host.docker.internal' not in request.url_root:
+        abort(403)
 
 
 @app.route('/')
@@ -49,6 +57,7 @@ def get_book_ratings(book_id):
 def post_book_ratings(book_id):
     if not request.args:
         error_response = {'error': 'Bad data'}
+        app.logger.info('error: Bad data')
         return jsonify(error_response), 400
 
     is_missing_args = not 'value' in request.args or not 'email' in request.args
